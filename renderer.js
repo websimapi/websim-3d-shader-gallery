@@ -3,7 +3,7 @@ export async function setupScene(canvasId) {
     const canvas = document.getElementById(canvasId);
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for mobile
     
     // Create a scene
     const scene = new THREE.Scene();
@@ -12,10 +12,16 @@ export async function setupScene(canvasId) {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 2;
     
-    // Create controls
+    // Create controls - ensure proper usage
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+    controls.enableZoom = true;
+    controls.enablePan = true;
+    controls.touches = {
+        ONE: THREE.TOUCH.ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN
+    };
     
     // Create a mesh to display shaders on
     createMesh(scene);
@@ -27,8 +33,12 @@ export async function setupScene(canvasId) {
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
     
-    // Create GUI for shader parameters
-    const gui = new lil.GUI({ container: document.getElementById('controls') });
+    // Create a GUI with mobile considerations
+    const gui = new lil.GUI({ 
+        container: document.getElementById('controls'),
+        autoPlace: true,
+        width: Math.min(300, window.innerWidth * 0.8)
+    });
     gui.close(); // Start closed
     
     return { renderer, scene, camera, controls, gui };
@@ -107,8 +117,11 @@ export function updateShader(fragmentShader, vertexShader, uniformsData) {
         gui.destroy();
     }
     
-    // Create a new GUI
-    gui = new lil.GUI({ container: document.getElementById('controls') });
+    // Create a new GUI with mobile considerations
+    gui = new lil.GUI({ 
+        container: document.getElementById('controls'),
+        width: Math.min(300, window.innerWidth * 0.8)
+    });
     gui.title('Shader Controls');
     
     // Parse uniforms if they are a string

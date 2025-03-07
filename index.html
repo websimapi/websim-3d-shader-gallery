@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Shader Gallery</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.17.0/dist/lil-gui.umd.min.js"></script>
     <style>
         body {
@@ -46,6 +46,8 @@
             padding: 10px;
             gap: 10px;
             z-index: 10;
+            scrollbar-width: thin;
+            scrollbar-color: #555 #222;
         }
         
         .shader-thumbnail {
@@ -131,7 +133,7 @@
             background-color: #222;
             padding: 20px;
             border-radius: 10px;
-            width: 60%;
+            width: 90%;
             max-width: 800px;
             max-height: 80vh;
             overflow-y: auto;
@@ -199,6 +201,33 @@
             font-size: 24px;
             color: white;
             text-align: center;
+        }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            #gallery {
+                height: 100px;
+            }
+            
+            .shader-thumbnail {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+            }
+            
+            #createNew {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+            
+            .lil-gui {
+                scale: 0.8;
+                transform-origin: top right;
+            }
         }
     </style>
 </head>

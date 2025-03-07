@@ -26,6 +26,10 @@ async function init() {
     camera = c;
     controls = ctrl;
     
+    // Handle resize for all devices including mobile orientation changes
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    
     // Load shaders from database
     await loadShaders();
     
@@ -187,6 +191,16 @@ async function generateShaderFromPrompt(prompt) {
                     role: "system",
                     content: `You are an expert WebGL and GLSL shader programmer. 
                     Create a beautiful 3D shader based on the user's description.
+                    
+                    Consider using these advanced techniques in your shader code:
+                    - Raymarching for 3D shapes and scenes
+                    - Distance functions for complex geometry
+                    - Normal calculations for proper lighting
+                    - Soft shadows, ambient occlusion, and reflections
+                    - Procedural textures and noise functions
+                    - Color palettes and gradient techniques
+                    - Animation techniques using time uniform
+                    
                     Return ONLY valid JSON in the following format:
                     {
                         "fragmentShader": "// Full fragment shader code here",
@@ -199,7 +213,15 @@ async function generateShaderFromPrompt(prompt) {
                     Make sure the vertex and fragment shaders are compatible with THREE.js.
                     Include uniforms for time, resolution, and any other parameters that would make the shader interactive.
                     The shader should work properly when using THREE.ShaderMaterial in THREE.js r128.
-                    For uniforms with functions, provide string descriptions that can be parsed.`
+                    For uniforms with functions, provide string descriptions that can be parsed.
+                    
+                    Important THREE.js uniform examples:
+                    - time: { value: 0.0 } // float for animation
+                    - resolution: { value: new THREE.Vector2(800, 600) } // screen resolution
+                    - color: { value: new THREE.Color(0xff0000) } // colors
+                    - textureSampler: { value: new THREE.TextureLoader().load('url') } // textures
+                    
+                    Make sure the shader is optimized for mobile by considering computational complexity.`
                 },
                 {
                     role: "user",
@@ -233,6 +255,19 @@ async function generateShaderFromPrompt(prompt) {
     }
 }
 
+function handleResize() {
+    if (camera && renderer) {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        
+        // Update resolution uniform if it exists
+        if (currentShader && currentShader.uniforms && currentShader.uniforms.resolution) {
+            currentShader.uniforms.resolution.value.set(window.innerWidth, window.innerHeight);
+        }
+    }
+}
+
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
@@ -260,4 +295,3 @@ function hideLoading() {
 
 // Initialize the application
 init();
-
