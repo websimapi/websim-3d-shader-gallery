@@ -28,7 +28,10 @@ async function init() {
     
     // Handle resize for all devices including mobile orientation changes
     window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
+    window.addEventListener('orientationchange', () => {
+        // Add short timeout to ensure dimensions are updated after orientation change
+        setTimeout(handleResize, 100);
+    });
     
     // Load shaders from database
     await loadShaders();
@@ -85,9 +88,11 @@ function updateGallery(shaders) {
         title.textContent = shader.name;
         thumbnailDiv.appendChild(title);
         
-        // Click handler
-        thumbnailDiv.addEventListener('click', () => {
-            applyShader(shader.id);
+        // Click handler with touch handling
+        thumbnailDiv.addEventListener('click', (e) => {
+            if (!isTouchScrolling) {
+                applyShader(shader.id);
+            }
         });
         
         galleryEl.appendChild(thumbnailDiv);
@@ -255,15 +260,27 @@ async function generateShaderFromPrompt(prompt) {
     }
 }
 
+let isTouchScrolling = false;
+const gallery = document.getElementById('gallery');
+gallery.addEventListener('touchstart', () => { isTouchScrolling = true; });
+gallery.addEventListener('touchend', () => { 
+    // Small delay to differentiate between scroll and tap
+    setTimeout(() => { isTouchScrolling = false; }, 100); 
+});
+
 function handleResize() {
     if (camera && renderer) {
-        camera.aspect = window.innerWidth / window.innerHeight;
+        // Get actual window dimensions
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        camera.aspect = width / height;
         camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(width, height);
         
         // Update resolution uniform if it exists
         if (currentShader && currentShader.uniforms && currentShader.uniforms.resolution) {
-            currentShader.uniforms.resolution.value.set(window.innerWidth, window.innerHeight);
+            currentShader.uniforms.resolution.value.set(width, height);
         }
     }
 }

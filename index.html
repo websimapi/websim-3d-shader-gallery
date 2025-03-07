@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>3D Shader Gallery</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -48,6 +48,7 @@
             z-index: 10;
             scrollbar-width: thin;
             scrollbar-color: #555 #222;
+            -webkit-overflow-scrolling: touch;
         }
         
         .shader-thumbnail {
@@ -203,20 +204,46 @@
             text-align: center;
         }
         
+        #resetCamera {
+            position: absolute;
+            bottom: 140px;
+            right: 15px;
+            z-index: 11;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(40, 40, 40, 0.8);
+            color: white;
+            border: 2px solid #66aaff;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #resetCamera:active {
+            transform: scale(0.9);
+        }
+        
         /* Mobile-specific styles */
         @media (max-width: 768px) {
             #gallery {
                 height: 100px;
+                padding: 5px;
+                gap: 5px;
             }
             
             .shader-thumbnail {
                 width: 80px;
                 height: 80px;
+                min-width: 80px;
             }
             
             .modal-content {
                 width: 95%;
                 padding: 15px;
+                max-height: 90vh;
             }
             
             #createNew {
@@ -227,6 +254,36 @@
             .lil-gui {
                 scale: 0.8;
                 transform-origin: top right;
+                max-height: 60vh;
+                overflow-y: auto;
+            }
+            
+            #resetCamera {
+                bottom: 120px;
+                width: 36px;
+                height: 36px;
+            }
+            
+            /* Make touch targets larger */
+            button, .form-group input, .form-group textarea {
+                min-height: 44px;
+            }
+        }
+        
+        /* Landscape orientation adjustments */
+        @media (max-width: 900px) and (orientation: landscape) {
+            #gallery {
+                height: 80px;
+            }
+            
+            .shader-thumbnail {
+                width: 70px;
+                height: 70px;
+                min-width: 70px;
+            }
+            
+            #resetCamera {
+                bottom: 100px;
             }
         }
     </style>
@@ -239,6 +296,7 @@
         </div>
         <div id="controls"></div>
         <button id="createNew">Create New Shader</button>
+        <button id="resetCamera">Reset Camera</button>
     </div>
     
     <div id="modal">

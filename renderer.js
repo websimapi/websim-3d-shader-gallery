@@ -22,9 +22,16 @@ export async function setupScene(canvasId) {
         ONE: THREE.TOUCH.ROTATE,
         TWO: THREE.TOUCH.DOLLY_PAN
     };
+    controls.minDistance = 1; // Limit how close we can zoom
+    controls.maxDistance = 10; // Limit how far we can zoom
+    controls.rotateSpeed = 0.7; // Adjust rotation sensitivity
+    controls.enableDamping = true; // Smoother camera movement
     
     // Create a mesh to display shaders on
     createMesh(scene);
+    
+    // Create reset camera button
+    createResetButton(camera, controls);
     
     // Handle window resize
     window.addEventListener('resize', () => {
@@ -108,6 +115,23 @@ function createMesh(scene) {
     }
     
     animate();
+}
+
+// Create a reset camera button
+function createResetButton(camera, controls) {
+    const resetButton = document.createElement('button');
+    resetButton.id = 'resetCamera';
+    resetButton.textContent = '↺';
+    resetButton.title = 'Reset Camera';
+    document.body.appendChild(resetButton);
+    
+    resetButton.addEventListener('click', () => {
+        // Reset camera position and rotation
+        camera.position.set(0, 0, 2);
+        camera.lookAt(0, 0, 0);
+        controls.target.set(0, 0, 0);
+        controls.update();
+    });
 }
 
 // Update the shader material with new code
