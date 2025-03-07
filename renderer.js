@@ -1,8 +1,18 @@
 export async function setupScene(canvasId) {
+    // Wait for Three.js to be fully loaded
+    await new Promise(resolve => {
+        if (window.THREE) {
+            resolve();
+        } else {
+            window.addEventListener('load', resolve);
+        }
+    });
+    
     // Create a renderer
     const canvas = document.getElementById(canvasId);
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x111111, 1); // Set background color
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for mobile
     
     // Create a scene
@@ -96,12 +106,21 @@ function createMesh(scene) {
         side: THREE.DoubleSide
     });
     
-    // Create a geometry
-    const geometry = new THREE.IcosahedronGeometry(1, 4);
+    // Create a geometry - use a simpler geometry for better performance
+    const geometry = new THREE.IcosahedronGeometry(1, 2);
     
     // Create a mesh
     shaderObject = new THREE.Mesh(geometry, shaderMaterial);
     scene.add(shaderObject);
+    
+    // Create a directional light to ensure the mesh is visible
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(1, 1, 1);
+    scene.add(light);
+    
+    // Add ambient light for better visibility
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
     
     // Add an animation loop for the time uniform
     const clock = new THREE.Clock();

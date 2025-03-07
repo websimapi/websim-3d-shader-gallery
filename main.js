@@ -17,32 +17,45 @@ const shaderPromptInput = document.getElementById('shaderPrompt');
 // Initialize
 let currentShader = null;
 let renderer, scene, camera, controls;
+let isInitialized = false;
 
 // Setup Three.js scene
 async function init() {
-    const { renderer: r, scene: s, camera: c, controls: ctrl } = await setupScene('canvas3d');
-    renderer = r;
-    scene = s;
-    camera = c;
-    controls = ctrl;
-    
-    // Handle resize for all devices including mobile orientation changes
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', () => {
-        // Add short timeout to ensure dimensions are updated after orientation change
-        setTimeout(handleResize, 100);
-    });
-    
-    // Load shaders from database
-    await loadShaders();
-    
-    // Event handlers
-    createNewBtn.addEventListener('click', openCreateModal);
-    saveShaderBtn.addEventListener('click', handleShaderCreate);
-    cancelBtn.addEventListener('click', closeModal);
-    
-    // Animation loop
-    animate();
+    try {
+        showLoading();
+        const { renderer: r, scene: s, camera: c, controls: ctrl } = await setupScene('canvas3d');
+        renderer = r;
+        scene = s;
+        camera = c;
+        controls = ctrl;
+        isInitialized = true;
+        
+        // Handle resize for all devices including mobile orientation changes
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', () => {
+            // Add short timeout to ensure dimensions are updated after orientation change
+            setTimeout(handleResize, 100);
+        });
+        
+        // Load shaders from database
+        await loadShaders();
+        
+        // Event handlers
+        createNewBtn.addEventListener('click', openCreateModal);
+        saveShaderBtn.addEventListener('click', handleShaderCreate);
+        cancelBtn.addEventListener('click', closeModal);
+        
+        // Animation loop
+        animate();
+        hideLoading();
+    } catch (error) {
+        console.error("Error initializing scene:", error);
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'loading error';
+        errorMessage.textContent = 'Error loading 3D scene. Please try refreshing the page.';
+        document.getElementById('renderContainer').appendChild(errorMessage);
+        hideLoading();
+    }
 }
 
 // Load shaders from the database
@@ -287,9 +300,13 @@ function handleResize() {
 
 // Animation loop
 function animate() {
+    if (!isInitialized) return;
+    
     requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
+    if (controls) controls.update();
+    if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+    }
 }
 
 // Helper functions
