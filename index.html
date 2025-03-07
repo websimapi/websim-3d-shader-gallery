@@ -1,0 +1,239 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Shader Gallery</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.17.0/dist/lil-gui.umd.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #eee;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+        }
+        
+        #renderContainer {
+            flex: 1;
+            position: relative;
+        }
+        
+        #gallery {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            overflow-x: auto;
+            padding: 10px;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .shader-thumbnail {
+            width: 100px;
+            height: 100px;
+            background-color: #333;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .shader-thumbnail:hover {
+            border-color: #66aaff;
+            transform: translateY(-5px);
+        }
+        
+        .shader-thumbnail.active {
+            border-color: #ff6688;
+        }
+        
+        .shader-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .shader-thumbnail .title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 3px;
+            font-size: 10px;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+        
+        #createNew {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        #createNew:hover {
+            background-color: #45a049;
+        }
+        
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 20;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            width: 60%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content h2 {
+            margin-top: 0;
+            color: #ff6688;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: #eee;
+            font-family: Arial, sans-serif;
+        }
+        
+        .form-group textarea {
+            height: 100px;
+            font-family: monospace;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .button-group button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        #saveShaderBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        #cancelBtn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: white;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="renderContainer">
+            <canvas id="canvas3d"></canvas>
+            <div id="gallery"></div>
+        </div>
+        <div id="controls"></div>
+        <button id="createNew">Create New Shader</button>
+    </div>
+    
+    <div id="modal">
+        <div class="modal-content">
+            <h2>Create New Shader</h2>
+            <div class="form-group">
+                <label for="shaderName">Shader Name:</label>
+                <input type="text" id="shaderName" placeholder="Enter a name for your shader">
+            </div>
+            <div class="form-group">
+                <label for="shaderDescription">Description:</label>
+                <textarea id="shaderDescription" placeholder="Describe what your shader does"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="shaderPrompt">AI Prompt (describe the shader you want):</label>
+                <textarea id="shaderPrompt" placeholder="Example: A plasma-like effect with swirling colors that react to music"></textarea>
+            </div>
+            <div class="button-group">
+                <button id="cancelBtn">Cancel</button>
+                <button id="saveShaderBtn">Generate & Save</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="main.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
