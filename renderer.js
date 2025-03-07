@@ -181,11 +181,7 @@ export function updateShader(fragmentShader, vertexShader, uniformsData) {
 export function captureShaderThumbnail(renderer) {
     return new Promise((resolve) => {
         // Render the scene
-        renderer.render(renderer.scene, renderer.camera);
-        
-        // Get the data URL from the canvas
         const dataURL = renderer.domElement.toDataURL('image/png');
         resolve(dataURL);
     });
 }
-
